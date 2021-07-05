@@ -2,9 +2,7 @@ local function tabName(bufnr)
     local file = vim.fn.bufname(bufnr)
     local buftype = vim.fn.getbufvar(bufnr, '&buftype')
     local filetype = vim.fn.getbufvar(bufnr, '&filetype')
-    if file == '' then
-        return '[No Name]'
-    elseif buftype == 'help' then
+    if buftype == 'help' then
         return 'help:' .. vim.fn.fnamemodify(file, ':t:r')
     elseif buftype == 'quickfix' then
         return 'quickfix'
@@ -14,6 +12,8 @@ local function tabName(bufnr)
         return 'FZF'
     elseif buftype == 'terminal' then
         return 'zsh'
+    elseif file == '' then
+        return '[No Name]'
     end
     return vim.fn.pathshorten(vim.fn.fnamemodify(file, ':p:~:t'))
 end
@@ -32,12 +32,14 @@ local function tabDevicon(bufnr, isSelected)
     local file = vim.fn.bufname(bufnr)
     local buftype = vim.fn.getbufvar(bufnr, '&buftype')
     local filetype = vim.fn.getbufvar(bufnr, '&filetype')
-    if buftype == 'terminal' then
-        dev, devhl = require'nvim-web-devicons'.get_icon('zsh')
+    if filetype == 'TelescopePrompt' then
+        dev, devhl = require'nvim-web-devicons'.get_icon('telescope')
     elseif filetype == 'fugitive' then
         dev, devhl = require'nvim-web-devicons'.get_icon('git')
     elseif filetype == 'vimwiki' then
         dev, devhl = require'nvim-web-devicons'.get_icon('markdown')
+    elseif buftype == 'terminal' then
+        dev, devhl = require'nvim-web-devicons'.get_icon('zsh')
     else
         dev, devhl = require'nvim-web-devicons'.get_icon(file, vim.fn.getbufvar(bufnr, '&filetype'))
     end
@@ -52,12 +54,10 @@ local function tabSeparator(current)
 end
 
 local function formatTab(current)
-    local t = vim.fn.tabpagenr()
     local isSelected = vim.fn.tabpagenr() == current
     local buflist = vim.fn.tabpagebuflist(current)
     local winnr = vim.fn.tabpagewinnr(current)
     local bufnr = buflist[winnr]
-    local file = vim.fn.bufname(bufnr)
     local hl = (isSelected and '%#TabLineSel#' or '%#TabLine#')
 
     return hl .. ' ' ..
