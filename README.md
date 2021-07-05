@@ -1,4 +1,7 @@
 # luatab.nvim
+
+![luatab](https://github.com/alvarosevilla95/luatab.nvim/blob/master/pics/tabline.png)
+
 ## Features
 * Just a lua rewrite of the tabline render function
 * No weird mixing buffers and tabs stuff
