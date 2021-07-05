@@ -45,6 +45,8 @@ tags
 # helptags
 doc/tags
 
+.DS_Store
+
 .github
 .lua-format
 .luacheckrc
