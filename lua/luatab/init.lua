@@ -44,13 +44,17 @@ local function tabDevicon(bufnr, isSelected)
         dev, devhl = require'nvim-web-devicons'.get_icon(file, vim.fn.getbufvar(bufnr, '&filetype'))
     end
     if dev then
-        return (isSelected and '%#'..devhl..'#' or '') .. dev .. (isSelected and '%#TabLineSel#' or '')
+        local h = require'luatab.highlight'
+        local fg = h.extract_highlight_colors(devhl, 'fg')
+        local bg = h.extract_highlight_colors('TabLineSel', 'bg')
+        local hl = h.create_component_highlight_group({bg = bg, fg = fg}, devhl)
+        return (isSelected and '%#'..hl..'#' or '') .. dev .. (isSelected and '%#TabLineSel#' or '') .. ' '
     end
     return ''
 end
 
 local function tabSeparator(current)
-    return ' ' .. (current < vim.fn.tabpagenr('$') and '%#TabLine#|' or '')
+    return (current < vim.fn.tabpagenr('$') and '%#TabLine#|' or '')
 end
 
 local function formatTab(current)
