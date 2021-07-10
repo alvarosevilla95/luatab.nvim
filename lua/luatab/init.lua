@@ -64,11 +64,11 @@ local function formatTab(current)
     local bufnr = buflist[winnr]
     local hl = (isSelected and '%#TabLineSel#' or '%#TabLine#')
 
-    return hl .. ' ' ..
+    return hl .. '%' .. current .. 'T' .. ' ' ..
         tabWindowCount(current) ..
         tabName(bufnr) .. ' ' ..
         tabModified(bufnr) ..
-        tabDevicon(bufnr, isSelected) ..
+        tabDevicon(bufnr, isSelected) .. '%T' ..
         tabSeparator(current)
 end
 
@@ -79,7 +79,11 @@ local function tabline()
         line = line .. formatTab(i)
         i = i + 1
     end
-    return  line .. '%T%#TabLineFill#%='
+    line = line .. '%#TabLineFill#%='
+    if vim.fn.tabpagenr('$') > 1 then
+        line = line .. '%#TabLine#%999XX'
+    end
+    return line
 end
 
 local M = {
