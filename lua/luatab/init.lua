@@ -11,7 +11,7 @@ local function tabName(bufnr)
     elseif file:sub(file:len()-2, file:len()) == 'FZF' then
         return 'FZF'
     elseif buftype == 'terminal' then
-	_, mtch = string.match(file, "term:(.*):(%a+)")
+        local _, mtch = string.match(file, "term:(.*):(%a+)")
         return mtch ~= nil and mtch or 'zsh'
     elseif file == '' then
         return '[No Name]'
