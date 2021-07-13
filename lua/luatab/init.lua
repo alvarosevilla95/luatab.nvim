@@ -12,7 +12,7 @@ local function tabName(bufnr)
         return 'FZF'
     elseif buftype == 'terminal' then
         local _, mtch = string.match(file, "term:(.*):(%a+)")
-        return mtch ~= nil and mtch or 'zsh'
+        return mtch ~= nil and mtch or vim.fn.fnamemodify(vim.env.SHELL, ':t')
     elseif file == '' then
         return '[No Name]'
     end
