@@ -42,7 +42,7 @@ local function tabDevicon(bufnr, isSelected)
     elseif buftype == 'terminal' then
         dev, devhl = require'nvim-web-devicons'.get_icon('zsh')
     else
-        dev, devhl = require'nvim-web-devicons'.get_icon(file, vim.fn.expand('%:e'))
+        dev, devhl = require'nvim-web-devicons'.get_icon(file, vim.fn.expand('#'..bufnr..':e'))
     end
     if dev then
         local h = require'luatab.highlight'
