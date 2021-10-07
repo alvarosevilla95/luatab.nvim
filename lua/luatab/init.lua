@@ -49,7 +49,7 @@ local function tabDevicon(bufnr, isSelected)
         local fg = h.extract_highlight_colors(devhl, 'fg')
         local bg = h.extract_highlight_colors('TabLineSel', 'bg')
         local hl = h.create_component_highlight_group({bg = bg, fg = fg}, devhl)
-        return (isSelected and '%#'..hl..'#' or '') .. dev .. (isSelected and '%#TabLineSel#' or '') .. ' '
+        return ((isSelected and hl) and '%#'..hl..'#' or '') .. dev .. (isSelected and '%#TabLineSel#' or '') .. ' '
     end
     return ''
 end
