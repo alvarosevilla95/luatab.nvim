@@ -54,11 +54,12 @@ local function tabDevicon(bufnr, isSelected)
     return ''
 end
 
-local function tabSeparator(current)
-    return (current < vim.fn.tabpagenr('$') and '%#TabLine#|' or '')
+local function tabSeparator(current, separator)
+    local sep = separator or '|'
+    return (current < vim.fn.tabpagenr('$') and '%#TabLine#'..sep or '')
 end
 
-local function formatTab(current)
+local function formatTab(current, separator)
     local isSelected = vim.fn.tabpagenr() == current
     local buflist = vim.fn.tabpagebuflist(current)
     local winnr = vim.fn.tabpagewinnr(current)
@@ -70,14 +71,14 @@ local function formatTab(current)
         tabName(bufnr) .. ' ' ..
         tabModified(bufnr) ..
         tabDevicon(bufnr, isSelected) .. '%T' ..
-        tabSeparator(current)
+        tabSeparator(current, separator)
 end
 
-local function tabline()
+local function tabline(separator)
     local i = 1
     local line = ''
     while i <= vim.fn.tabpagenr('$') do
-        line = line .. formatTab(i)
+        line = line .. formatTab(i, separator)
         i = i + 1
     end
     line = line .. '%#TabLineFill#%='
