@@ -1,13 +1,20 @@
-local function tabName(bufnr)
+local M = {}
+
+M.title = function(bufnr)
     local file = vim.fn.bufname(bufnr)
     local buftype = vim.fn.getbufvar(bufnr, '&buftype')
     local filetype = vim.fn.getbufvar(bufnr, '&filetype')
+
     if buftype == 'help' then
         return 'help:' .. vim.fn.fnamemodify(file, ':t:r')
     elseif buftype == 'quickfix' then
         return 'quickfix'
     elseif filetype == 'TelescopePrompt' then
         return 'Telescope'
+    elseif filetype == 'git' then
+        return 'Git'
+    elseif filetype == 'fugitive' then
+        return 'Fugitive'
     elseif file:sub(file:len()-2, file:len()) == 'FZF' then
         return 'FZF'
     elseif buftype == 'terminal' then
@@ -15,70 +22,76 @@ local function tabName(bufnr)
         return mtch ~= nil and mtch or vim.fn.fnamemodify(vim.env.SHELL, ':t')
     elseif file == '' then
         return '[No Name]'
+    else
+        return vim.fn.pathshorten(vim.fn.fnamemodify(file, ':p:~:t'))
     end
-    return vim.fn.pathshorten(vim.fn.fnamemodify(file, ':p:~:t'))
 end
 
-local function tabModified(bufnr)
+M.modified = function(bufnr)
     return vim.fn.getbufvar(bufnr, '&modified') == 1 and '[+] ' or ''
 end
 
-local function tabWindowCount(current)
-    local nwins = vim.fn.tabpagewinnr(current, '$')
+M.windowCount = function(index)
+    local nwins = 0
+    local success, wins = pcall(vim.api.nvim_tabpage_list_wins, index)
+    if success then
+        for _ in pairs(wins) do nwins = nwins + 1 end
+    end
     return nwins > 1 and '(' .. nwins .. ') ' or ''
 end
 
-local function tabDevicon(bufnr, isSelected)
-    local dev, devhl
+M.devicon = function(bufnr, isSelected)
+    local icon, devhl
     local file = vim.fn.bufname(bufnr)
     local buftype = vim.fn.getbufvar(bufnr, '&buftype')
     local filetype = vim.fn.getbufvar(bufnr, '&filetype')
+    local devicons = require'nvim-web-devicons'
     if filetype == 'TelescopePrompt' then
-        dev, devhl = require'nvim-web-devicons'.get_icon('telescope')
+        icon, devhl = devicons.get_icon('telescope')
     elseif filetype == 'fugitive' then
-        dev, devhl = require'nvim-web-devicons'.get_icon('git')
+        icon, devhl = devicons.get_icon('git')
     elseif filetype == 'vimwiki' then
-        dev, devhl = require'nvim-web-devicons'.get_icon('markdown')
+        icon, devhl = devicons.get_icon('markdown')
     elseif buftype == 'terminal' then
-        dev, devhl = require'nvim-web-devicons'.get_icon('zsh')
+        icon, devhl = devicons.get_icon('zsh')
     else
-        dev, devhl = require'nvim-web-devicons'.get_icon(file, vim.fn.expand('#'..bufnr..':e'))
+        icon, devhl = devicons.get_icon(file, vim.fn.expand('#'..bufnr..':e'))
     end
-    if dev then
+    if icon then
         local h = require'luatab.highlight'
         local fg = h.extract_highlight_colors(devhl, 'fg')
         local bg = h.extract_highlight_colors('TabLineSel', 'bg')
         local hl = h.create_component_highlight_group({bg = bg, fg = fg}, devhl)
-        return ((isSelected and hl) and '%#'..hl..'#' or '') .. dev .. (isSelected and '%#TabLineSel#' or '') .. ' '
+        local selectedHlStart = (isSelected and hl) and '%#'..hl..'#' or ''
+        local selectedHlEnd = isSelected and '%#TabLineSel#' or ''
+        return selectedHlStart .. icon .. selectedHlEnd .. ' '
     end
     return ''
 end
 
-local function tabSeparator(current)
-    return (current < vim.fn.tabpagenr('$') and '%#TabLine#|' or '')
+M.separator = function(index)
+    return (index < vim.fn.tabpagenr('$') and '%#TabLine#|' or '')
 end
 
-local function formatTab(current)
-    local isSelected = vim.fn.tabpagenr() == current
-    local buflist = vim.fn.tabpagebuflist(current)
-    local winnr = vim.fn.tabpagewinnr(current)
+M.cell = function(index)
+    local isSelected = vim.fn.tabpagenr() == index
+    local buflist = vim.fn.tabpagebuflist(index)
+    local winnr = vim.fn.tabpagewinnr(index)
     local bufnr = buflist[winnr]
     local hl = (isSelected and '%#TabLineSel#' or '%#TabLine#')
 
-    return hl .. '%' .. current .. 'T' .. ' ' ..
-        tabWindowCount(current) ..
-        tabName(bufnr) .. ' ' ..
-        tabModified(bufnr) ..
-        tabDevicon(bufnr, isSelected) .. '%T' ..
-        tabSeparator(current)
+    return hl .. '%' .. index .. 'T' .. ' ' ..
+        M.windowCount(index) ..
+        M.title(bufnr) .. ' ' ..
+        M.modified(bufnr) ..
+        M.devicon(bufnr, isSelected) .. '%T' ..
+        M.separator(index)
 end
 
-local function tabline()
-    local i = 1
+M.tabline = function()
     local line = ''
-    while i <= vim.fn.tabpagenr('$') do
-        line = line .. formatTab(i)
-        i = i + 1
+    for i = 1, vim.fn.tabpagenr('$'), 1 do
+        line = line .. M.cell(i)
     end
     line = line .. '%#TabLineFill#%='
     if vim.fn.tabpagenr('$') > 1 then
@@ -87,14 +100,30 @@ local function tabline()
     return line
 end
 
-local M = {
-    tabline = tabline,
-    formatTab = formatTab,
-    tabSeparator = tabSeparator,
-    tabWindowCount = tabWindowCount,
-    tabName = tabName,
-    tabModified = tabModified,
-    tabDevicon = tabDevicon,
-}
+local setup = function(opts)
+    if opts.title then M.title = opts.title end
+    if opts.modified then M.modified = opts.modified end
+    if opts.windowCount then M.windowCount = opts.windowCount end
+    if opts.devicon then M.devicon = opts.devicon end
+    if opts.separator then M.separator = opts.separator end
+    if opts.cell then M.cell = opts.cell end
+    if opts.tabline then M.tabline = opts.tabline end
 
-return M
+    vim.opt.tabline = '%!v:lua.require\'luatab\'.helpers.tabline()'
+end
+
+local warning = function()
+    error [[ 
+Hi, I've updated luatab.nvim to allow some proper configuration. As a result, I need to make a breaking change to the config. Apologies for the inconvinence.
+If you had:
+    vim.o.tabline = '%!v:lua.require\'luatab\'.tabline()' 
+please replace it with
+    require('luatab').setup({})
+]]
+end
+
+return {
+    helpers = M,
+    setup = setup,
+    tabline = warning,
+}

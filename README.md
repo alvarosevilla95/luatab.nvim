@@ -14,24 +14,22 @@ use { 'alvarosevilla95/luatab.nvim', requires='kyazdani42/nvim-web-devicons' }
 
 ## Usage
 Add this to your init.lua:
-
 ```
-vim.o.tabline = '%!v:lua.require\'luatab\'.tabline()'
+require('luatab').setup{}
 ```
 
 ## Configuration
-You can also define your own tabline function using the provided functions for help. The default tabline is equivalent to:
-```
-local formatTab = require'luatab'.formatTab
-Tabline = function()
-    local i = 1
-    local line = ''
-    while i <= vim.fn.tabpagenr('$') do
-        line = line .. formatTab(i)
-        i = i + 1
-    end
-    return  line .. '%T%#TabLineFill#%='
-end
-```
 
+The plugin calls the `helpers.tabline` function to render the line. It uses the other functions defined in `helpers`, such as `cell,separator,devicon`.
+You can pass overrides for any of these functions in `setup`. Please see `lua/luatab/init.lua` for details.
 
+Example:
+```
+require('luatab').setup{
+    title = function() return '' end,
+    modified = function() return '' end,
+    windowCount = function() return '' end,
+    devicon = function() return '' end,
+    separator = function() return '' end,
+}
+```
