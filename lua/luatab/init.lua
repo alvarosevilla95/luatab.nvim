@@ -101,6 +101,7 @@ M.tabline = function()
 end
 
 local setup = function(opts)
+    opts = opts or {}
     if opts.title then M.title = opts.title end
     if opts.modified then M.modified = opts.modified end
     if opts.windowCount then M.windowCount = opts.windowCount end
