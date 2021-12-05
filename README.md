@@ -1,6 +1,8 @@
 # luatab.nvim
 
-![luatab](https://github.com/alvarosevilla95/luatab.nvim/blob/master/pics/tabline.png)
+<p align="center">
+  <img src="https://github.com/alvarosevilla95/luatab.nvim/blob/master/pics/tabline.png" />
+</p>
 
 ## Features
 * Just a lua rewrite of the tabline render function
