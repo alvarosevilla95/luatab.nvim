@@ -1,9 +1,15 @@
 local M = {}
 
-M.title = function(bufnr)
+M.tab_labels = {'default'}
+
+M.title = function(bufnr, current_label)
     local file = vim.fn.bufname(bufnr)
     local buftype = vim.fn.getbufvar(bufnr, '&buftype')
     local filetype = vim.fn.getbufvar(bufnr, '&filetype')
+
+    if current_label ~= "default" then
+        return current_label
+    end
 
     if buftype == 'help' then
         return 'help:' .. vim.fn.fnamemodify(file, ':t:r')
@@ -40,12 +46,17 @@ M.windowCount = function(index)
     return nwins > 1 and '(' .. nwins .. ') ' or ''
 end
 
-M.devicon = function(bufnr, isSelected)
+M.devicon = function(bufnr, isSelected, current_label)
     local icon, devhl
     local file = vim.fn.bufname(bufnr)
     local buftype = vim.fn.getbufvar(bufnr, '&buftype')
     local filetype = vim.fn.getbufvar(bufnr, '&filetype')
     local devicons = require'nvim-web-devicons'
+
+    if current_label ~= 'default' then
+        return "🌝"
+    end
+
     if filetype == 'TelescopePrompt' then
         icon, devhl = devicons.get_icon('telescope')
     elseif filetype == 'fugitive' then
@@ -78,13 +89,14 @@ M.cell = function(index)
     local buflist = vim.fn.tabpagebuflist(index)
     local winnr = vim.fn.tabpagewinnr(index)
     local bufnr = buflist[winnr]
+    local current_label = M.tab_labels[index]
     local hl = (isSelected and '%#TabLineSel#' or '%#TabLine#')
 
     return hl .. '%' .. index .. 'T' .. ' ' ..
         M.windowCount(index) ..
-        M.title(bufnr) .. ' ' ..
+        M.title(bufnr, current_label) .. ' ' ..
         M.modified(bufnr) ..
-        M.devicon(bufnr, isSelected) .. '%T' ..
+        M.devicon(bufnr, isSelected, current_label) .. '%T' ..
         M.separator(index)
 end
 
@@ -98,6 +110,12 @@ M.tabline = function()
         line = line .. '%#TabLine#%999XX'
     end
     return line
+end
+
+
+M.rename_tab = function()
+    local new_label = vim.fn.input('New tab name: ')
+    M.tab_labels[vim.fn.tabpagenr()] = new_label
 end
 
 local setup = function(opts)
@@ -122,6 +140,26 @@ please replace it with
     require('luatab').setup({})
 ]]
 end
+
+-- When you enter a new tab
+vim.api.nvim_create_autocmd('TabNew', {
+    callback = function()
+      local tabs_labels = require('luatab').helpers.tab_labels
+      table.insert(tabs_labels, 'default')
+    end
+})
+
+-- When you leave a tab
+vim.api.nvim_create_autocmd('TabClosed', {
+    callback = function()
+      local tabs_labels = require('luatab').helpers.tab_labels
+      local removed_index = vim.fn.expand('<afile>')
+      table.remove(tabs_labels, removed_index)
+    end
+})
+
+vim.api.nvim_create_user_command('LuatabLabelRename', 'lua require(\'luatab\').helpers.rename_tab()', {})
+
 
 return {
     helpers = M,
