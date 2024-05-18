@@ -34,11 +34,7 @@ M.modified = function(bufnr)
 end
 
 M.windowCount = function(index)
-    local nwins = 0
-    local success, wins = pcall(vim.api.nvim_tabpage_list_wins, index)
-    if success then
-        for _ in pairs(wins) do nwins = nwins + 1 end
-    end
+    local nwins = vim.fn.tabpagewinnr(index, '$')
     return nwins > 1 and '(' .. nwins .. ') ' or ''
 end
 
