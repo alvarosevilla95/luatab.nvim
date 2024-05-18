@@ -15,6 +15,8 @@ M.title = function(bufnr)
         return 'Git'
     elseif filetype == 'fugitive' then
         return 'Fugitive'
+    elseif filetype == 'NvimTree' then
+        return 'NvimTree'
     elseif file:sub(file:len()-2, file:len()) == 'FZF' then
         return 'FZF'
     elseif buftype == 'terminal' then
