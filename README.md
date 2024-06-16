@@ -10,13 +10,18 @@
 
 ## Install
 Using packer.nvim:
+```lua
+use { 'alvarosevilla95/luatab.nvim', requires='nvim-tree/nvim-web-devicons' }
 ```
-use { 'alvarosevilla95/luatab.nvim', requires='kyazdani42/nvim-web-devicons' }
+
+Using [`lazy.nvim`](https://github.com/folke/lazy.nvim)
+```lua
+{ 'alvarosevilla95/luatab.nvim', dependencies = { 'nvim-tree/nvim-web-devicons' } }
 ```
 
 ## Usage
 Add this to your init.lua:
-```
+```lua
 require('luatab').setup{}
 ```
 
