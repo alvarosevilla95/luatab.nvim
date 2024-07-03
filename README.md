@@ -25,6 +25,11 @@ Add this to your init.lua:
 require('luatab').setup{}
 ```
 
+Rename the current tab using:
+```
+:LuatabLabelRename
+```
+
 ## Configuration
 
 The plugin calls the `helpers.tabline` function to render the line. It uses the other functions defined in `helpers`, such as `cell,separator,devicon`.
