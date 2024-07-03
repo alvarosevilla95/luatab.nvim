@@ -42,7 +42,7 @@ end
 
 M.devicon = function(bufnr, isSelected)
     local icon, devhl
-    local file = vim.fn.bufname(bufnr)
+    local file = vim.fn.fnamemodify(vim.fn.bufname(bufnr), ':t')
     local buftype = vim.fn.getbufvar(bufnr, '&buftype')
     local filetype = vim.fn.getbufvar(bufnr, '&filetype')
     local devicons = require'nvim-web-devicons'
@@ -114,10 +114,10 @@ local setup = function(opts)
 end
 
 local warning = function()
-    error [[ 
+    error [[
 Hi, I've updated luatab.nvim to allow some proper configuration. As a result, I need to make a breaking change to the config. Apologies for the inconvinence.
 If you had:
-    vim.o.tabline = '%!v:lua.require\'luatab\'.tabline()' 
+    vim.o.tabline = '%!v:lua.require\'luatab\'.tabline()'
 please replace it with
     require('luatab').setup({})
 ]]
