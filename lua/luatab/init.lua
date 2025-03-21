@@ -17,6 +17,8 @@ M.title = function(bufnr)
         return 'Fugitive'
     elseif filetype == 'NvimTree' then
         return 'NvimTree'
+    elseif filetype == 'neo-tree' then
+        return 'NeoTree'
     elseif filetype == 'oil' then
         return 'Oil'
     elseif file:sub(file:len()-2, file:len()) == 'FZF' then
